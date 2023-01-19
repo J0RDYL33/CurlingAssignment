@@ -1,7 +1,3 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
-  stdafx.cpp
-  simulation.cpp
   Pool Game.cpp
-  Generating Code...
-Pool Game.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
   Pool Game.vcxproj -> D:\VS Projects\CurlingAssignment\Debug\Pool Game.exe

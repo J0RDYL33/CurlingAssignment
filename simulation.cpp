@@ -20,6 +20,7 @@ vec2	gPlaneNormal_Bottom(0.0,-1.0);
 */
 
 table gTable;
+table gTables[NUM_TABLES];
 
 static const float gRackPositionX[] = {0.0f,0.0f,(BALL_RADIUS*2.0f),(-BALL_RADIUS*2.0f),(BALL_RADIUS*4.0f)}; 
 static const float gRackPositionZ[] = {0.5f,0.0f,(-BALL_RADIUS*3.0f),(-BALL_RADIUS*3.0f)}; 
@@ -58,25 +59,35 @@ void ball::Reset(void)
 	//set velocity to zero
 	velocity = 0.0;
 
+	if ((index % NUM_BALLS) % 2 == 0)
+		team1 = true;
+	else
+		team1 = false;
+
 	//work out rack position
-	if(index==0)
+	if(index % NUM_BALLS==0)
 	{
-		position(1) = 4.5;
+		position(1) = 4;
 		position(0) = 0.0;
 		return;
 	}
-	
-	static const float sep = (BALL_RADIUS*3.0f);
+	static const float sep = (BALL_RADIUS * 3.0f);
 	static const float rowSep = (BALL_RADIUS*2.5f);
-	int row = 1;
-	int rowIndex = index;
-	while(rowIndex > row)
+	int rowIndex = index % NUM_BALLS;
+	int row = rowIndex / 4;
+	/*while (rowIndex > row)
 	{
 		rowIndex -= row;
 		row++;
 	}
-	position(1) = 1.0 +  -(rowSep * (row-1));
-	position(0) =  (((row-1)*sep)/2.0f) - (sep*(row-rowIndex));
+	if (rowIndex % 4 == 0)
+	{
+		row++;
+	}*/
+
+
+	position(1) = 5.7 + (row * rowSep);
+	position(0) = 0 + (sep * (rowIndex%4));
 }
 
 void ball::ApplyImpulse(vec2 imp)
@@ -196,9 +207,16 @@ void ball::HitBall(ball &b)
 	b.velocity = parallelV2 + (relDir*perpVNew2);
 }
 
+void ball::NextUp(void)
+{
+	position(1) = 4;
+	position(0) = 0.0;
+}
+
 /*-----------------------------------------------------------
   table class members
   -----------------------------------------------------------*/
+
 void table::SetupCushions(void)
 {
 	SetCushionPosition(0, -TABLE_X, -TABLE_Z, -TABLE_X, TABLE_Z);

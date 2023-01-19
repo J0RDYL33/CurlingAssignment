@@ -3,9 +3,13 @@
 
 #include "stdafx.h"
 #include "stdafx.h"
+#include <cstdlib>
 #include<glut.h>
 #include<math.h>
 #include"simulation.h"
+#include <iostream>
+
+using namespace std;
 
 //cue variables
 float gCueAngle = 0.0;
@@ -17,6 +21,10 @@ float gCuePowerMax = 0.75;
 float gCuePowerMin = 0.1;
 float gCueBallFactor = 8.0;
 bool gDoCue = true;
+
+//Added variables
+int currentBall = 0;
+bool justFinishedTurn = false;
 
 //camera variables
 vec3 gCamPos(0.0,1.0,7.1);
@@ -32,9 +40,9 @@ bool gCamZin = false;
 bool gCamZout = false;
 
 //Colours
-GLfloat const evenDarkerGreen[] = { 0, 0.2, 0 };
-GLfloat const darkGreen[] = {0, 0.3, 0};
-GLfloat const lighterGreen[] = { 0, 0.4, 0 };
+GLfloat const evenDarkerGreen[] = { 1.0, 1.0, 1.0 };
+GLfloat const darkGreen[] = {0.9, 0.9, 0.9};
+GLfloat const lighterGreen[] = { 0.8, 0.8, 0.8 };
 
 //rendering options
 #define DRAW_SOLID	(0)
@@ -130,6 +138,118 @@ void DoCamera(int ms)
 	}
 }
 
+void RenderTables(int tablePos)
+{
+	//draw the ball
+	for (int i = 0; i < NUM_BALLS; i++)
+	{
+		if(gTables[tablePos].balls[i].index % 2 == 0)
+			glColor3f(0.0, 1.0, 0.0);
+		else
+			glColor3f(0.0, 1.0, 1.0);
+		glPushMatrix();
+		glTranslatef(tablePos * 1.4, 0, 0);
+		glTranslatef(gTables[tablePos].balls[i].position(0), (BALL_RADIUS / 2.0), gTables[tablePos].balls[i].position(1));
+		glScalef(1, 0.5, 1);
+		#if DRAW_SOLID
+			glutSolidSphere(gTables[tablePos].balls[i].radius, 32, 32);
+		#else
+			glutWireSphere(gTables[tablePos].balls[i].radius, 12, 12);
+		#endif
+		glPopMatrix();
+		glColor3f(0.0, 1.0, 0.0);
+	}
+	//Set current color to green
+	glColor3fv(darkGreen);
+
+	//draw the table
+	for (int i = 0; i < NUM_CUSHIONS; i++)
+	{
+		glBegin(GL_QUADS);
+		glVertex3f(gTable.cushions[i].vertices[0](0), -0.05, gTable.cushions[i].vertices[0](1));
+		glVertex3f(gTable.cushions[i].vertices[0](0), 0.00, gTable.cushions[i].vertices[0](1));
+		glVertex3f(gTable.cushions[i].vertices[1](0), 0.00, gTable.cushions[i].vertices[1](1));
+		glVertex3f(gTable.cushions[i].vertices[1](0), -0.05, gTable.cushions[i].vertices[1](1));
+		glEnd();
+	}
+
+	glColor3f(0, 0, 1);
+	//draw the fake table
+	//Left wall
+	glPushMatrix();
+	glTranslatef(tablePos * 1.4, 0, 0);
+	glBegin(GL_QUADS);
+	glVertex3f(gTables[tablePos].fakeCushions[0].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[0].vertices[0](1) - 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[0].vertices[0](0) - 0.1, 0.00, gTables[tablePos].fakeCushions[0].vertices[0](1) - 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[0].vertices[1](0) - 0.1, 0.00, gTables[tablePos].fakeCushions[0].vertices[1](1) + 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[0].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[0].vertices[1](1) + 0.1);
+	glEnd();
+
+	//Bottom wall
+	glBegin(GL_QUADS);
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[1].vertices[0](1) + 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[1].vertices[0](1));
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[1].vertices[1](1));
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[1].vertices[1](1) + 0.1);
+	glEnd();
+
+	//Right wall
+	glBegin(GL_QUADS);
+	glVertex3f(gTables[tablePos].fakeCushions[2].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[2].vertices[0](1) + 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[2].vertices[0](0) + 0.1, 0.00, gTables[tablePos].fakeCushions[2].vertices[0](1) + 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[2].vertices[1](0) + 0.1, 0.00, gTables[tablePos].fakeCushions[2].vertices[1](1) - 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[2].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[2].vertices[1](1) - 0.1);
+	glEnd();
+
+	//Top wall
+	glBegin(GL_QUADS);
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[3].vertices[0](1) - 0.1);
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[0](0), 0.00, gTables[tablePos].fakeCushions[3].vertices[0](1));
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[3].vertices[1](1));
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[1](0), 0.00, gTables[tablePos].fakeCushions[3].vertices[1](1) - 0.1);
+	glEnd();
+
+	glColor3fv(evenDarkerGreen);
+	//Draw table ground
+	glBegin(GL_QUADS);
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[0](0), 0, gTables[tablePos].fakeCushions[1].vertices[0](1));
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[1](0), 0, gTables[tablePos].fakeCushions[3].vertices[1](1));
+	glVertex3f(gTables[tablePos].fakeCushions[3].vertices[0](0), 0, gTables[tablePos].fakeCushions[3].vertices[0](1));
+	glVertex3f(gTables[tablePos].fakeCushions[1].vertices[1](0), 0, gTables[tablePos].fakeCushions[1].vertices[1](1));
+	glEnd();
+
+	//Draw the scoring rings
+	glColor3f(0, 0, 1);
+	glTranslatef(0, 0.01, 4);
+	glRotatef(90, 1, 0, 0);
+	gluDisk(gluNewQuadric(), 0.3, 0.4, 30, 30);
+	glColor3f(1, 0, 0);
+	gluDisk(gluNewQuadric(), 0.1, 0.2, 30, 30);
+
+	glColor3f(0, 0, 1);
+	glTranslatef(0, -8, 0);
+	gluDisk(gluNewQuadric(), 0.3, 0.4, 30, 30);
+	glColor3f(1, 0, 0);
+	gluDisk(gluNewQuadric(), 0.1, 0.2, 30, 30);
+	glPopMatrix();
+
+	//draw the cue
+	if (gDoCue)
+	{
+		glPushMatrix();
+		glTranslatef(tablePos * 1.4, 0, 0);
+		glBegin(GL_LINES);
+		float cuex = sin(gCueAngle) * gCuePower;
+		float cuez = cos(gCueAngle) * gCuePower;
+		glColor3f(1.0, 0.0, 0.0);
+		glVertex3f(gTables[tablePos].balls[currentBall].position(0), (BALL_RADIUS / 2.0f), gTables[tablePos].balls[currentBall].position(1));
+		glVertex3f((gTables[tablePos].balls[currentBall].position(0) + cuex), (BALL_RADIUS / 2.0f), (gTables[tablePos].balls[currentBall].position(1) + cuez));
+		glColor3f(1.0, 1.0, 1.0);
+		glEnd();
+		glPopMatrix();
+	}
+}
+
 
 void RenderScene(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -138,76 +258,9 @@ void RenderScene(void) {
 	glLoadIdentity();
 	gluLookAt(gCamPos(0),gCamPos(1),gCamPos(2),gCamLookAt(0),gCamLookAt(1),gCamLookAt(2),0.0f,1.0f,0.0f);
 
-	//draw the ball
-	glColor3f(1.0,1.0,1.0);
-	for(int i=0;i<NUM_BALLS;i++)
-	{
-		glPushMatrix();
-		glTranslatef(gTable.balls[i].position(0),(BALL_RADIUS/2.0),gTable.balls[i].position(1));
-		#if DRAW_SOLID
-		glutSolidSphere(gTable.balls[i].radius,32,32);
-		#else
-		glutWireSphere(gTable.balls[i].radius,12,12);
-		#endif
-		glPopMatrix();
-		glColor3f(0.0,0.0,1.0);
-	}
-	//Set current color to green
-	glColor3fv(darkGreen);
-
-	//draw the table
-	for(int i=0;i<NUM_CUSHIONS;i++)
-	{	
-		glBegin(GL_QUADS);
-		glVertex3f (gTable.cushions[i].vertices[0](0), -0.05, gTable.cushions[i].vertices[0](1));
-		glVertex3f (gTable.cushions[i].vertices[0](0), 0.05, gTable.cushions[i].vertices[0](1));
-		glVertex3f (gTable.cushions[i].vertices[1](0), 0.05, gTable.cushions[i].vertices[1](1));
-		glVertex3f (gTable.cushions[i].vertices[1](0), -0.05, gTable.cushions[i].vertices[1](1));
-		glEnd();
-	}
-
-	glColor3fv(lighterGreen);
-	//draw the fake table
-	//Left wall
-	glBegin(GL_QUADS);
-	glVertex3f(gTable.fakeCushions[0].vertices[0](0), 0.05, gTable.fakeCushions[0].vertices[0](1) - 0.1);
-	glVertex3f(gTable.fakeCushions[0].vertices[0](0) - 0.1, 0.05, gTable.fakeCushions[0].vertices[0](1) - 0.1);
-	glVertex3f(gTable.fakeCushions[0].vertices[1](0) - 0.1, 0.05, gTable.fakeCushions[0].vertices[1](1) + 0.1);
-	glVertex3f(gTable.fakeCushions[0].vertices[1](0), 0.05, gTable.fakeCushions[0].vertices[1](1) + 0.1);
-	glEnd();
-
-	//Bottom wall
-	glBegin(GL_QUADS);
-	glVertex3f(gTable.fakeCushions[1].vertices[0](0), 0.05, gTable.fakeCushions[1].vertices[0](1)+0.1);
-	glVertex3f(gTable.fakeCushions[1].vertices[0](0), 0.05, gTable.fakeCushions[1].vertices[0](1));
-	glVertex3f(gTable.fakeCushions[1].vertices[1](0), 0.05, gTable.fakeCushions[1].vertices[1](1));
-	glVertex3f(gTable.fakeCushions[1].vertices[1](0), 0.05, gTable.fakeCushions[1].vertices[1](1)+0.1);
-	glEnd();
-
-	//Right wall
-	glBegin(GL_QUADS);
-	glVertex3f(gTable.fakeCushions[2].vertices[0](0), 0.05, gTable.fakeCushions[2].vertices[0](1) + 0.1);
-	glVertex3f(gTable.fakeCushions[2].vertices[0](0) + 0.1, 0.05, gTable.fakeCushions[2].vertices[0](1) + 0.1);
-	glVertex3f(gTable.fakeCushions[2].vertices[1](0) + 0.1, 0.05, gTable.fakeCushions[2].vertices[1](1) - 0.1);
-	glVertex3f(gTable.fakeCushions[2].vertices[1](0), 0.05, gTable.fakeCushions[2].vertices[1](1) - 0.1);
-	glEnd();
-
-	//Top wall
-	glBegin(GL_QUADS);
-	glVertex3f(gTable.fakeCushions[3].vertices[0](0), 0.05, gTable.fakeCushions[3].vertices[0](1) - 0.1);
-	glVertex3f(gTable.fakeCushions[3].vertices[0](0), 0.05, gTable.fakeCushions[3].vertices[0](1));
-	glVertex3f(gTable.fakeCushions[3].vertices[1](0), 0.05, gTable.fakeCushions[3].vertices[1](1));
-	glVertex3f(gTable.fakeCushions[3].vertices[1](0), 0.05, gTable.fakeCushions[3].vertices[1](1) - 0.1);
-	glEnd();
-
-	glColor3fv(evenDarkerGreen);
-	//Draw table ground
-	glBegin(GL_QUADS);
-	glVertex3f(gTable.fakeCushions[1].vertices[0](0), -0.05, gTable.fakeCushions[1].vertices[0](1));
-	glVertex3f(gTable.fakeCushions[3].vertices[1](0), -0.05, gTable.fakeCushions[3].vertices[1](1));
-	glVertex3f(gTable.fakeCushions[3].vertices[0](0), -0.05, gTable.fakeCushions[3].vertices[0](1));
-	glVertex3f(gTable.fakeCushions[1].vertices[1](0), -0.05, gTable.fakeCushions[1].vertices[1](1));
-	glEnd();
+	//Render each table
+	for(int i = 0; i<NUM_TABLES; i++)
+		RenderTables(i);
 	/*
 	glBegin(GL_LINE_LOOP);
 	glVertex3f (TABLE_X, 0.0, -TABLE_Z);
@@ -229,18 +282,7 @@ void RenderScene(void) {
 	glEnd();
 	*/
 
-	//draw the cue
-	if(gDoCue)
-	{
-		glBegin(GL_LINES);
-		float cuex = sin(gCueAngle) * gCuePower;
-		float cuez = cos(gCueAngle) * gCuePower;
-		glColor3f(1.0,0.0,0.0);
-		glVertex3f (gTable.balls[0].position(0), (BALL_RADIUS/2.0f), gTable.balls[0].position(1));
-		glVertex3f ((gTable.balls[0].position(0)+cuex), (BALL_RADIUS/2.0f), (gTable.balls[0].position(1)+cuez));
-		glColor3f(1.0,1.0,1.0);
-		glEnd();
-	}
+
 
 	//glPopMatrix();
 
@@ -311,18 +353,23 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			if(gDoCue)
 			{
 				vec2 imp(	(-sin(gCueAngle) * gCuePower * gCueBallFactor),
-							(-cos(gCueAngle) * gCuePower * gCueBallFactor));
-				gTable.balls[0].ApplyImpulse(imp);				
+							(-cos(gCueAngle) * gCuePower * gCueBallFactor));	
+				for(int i = 0; i<NUM_TABLES; i++)
+					gTables[i].balls[currentBall].ApplyImpulse(imp);
+				justFinishedTurn = true;
 			}
 			break;
 		}
 	case(27):
 		{
-			for(int i=0;i<NUM_BALLS;i++)
+			for (int j = 0; j < NUM_TABLES; j++)
 			{
-				gTable.balls[i].Reset();
+				for (int i = 0; i < NUM_BALLS; i++)
+				{
+					gTables[j].balls[i].Reset();
+				}
+				break;
 			}
-			break;
 		}
 	case(32):
 		{
@@ -448,11 +495,31 @@ void InitLights(void)
 
 void UpdateScene(int ms) 
 {
-	if(gTable.AnyBallsMoving()==false) gDoCue = true;
+	if(gTables[0].AnyBallsMoving() == false) gDoCue = true;
 	else gDoCue = false;
 
 	if(gDoCue)
 	{
+		//For now only works with table 1, move currentBall to table class to scale
+		if (justFinishedTurn == true)
+		{
+			currentBall++;
+			justFinishedTurn = false;
+
+			if (currentBall >= NUM_BALLS)
+			{
+				for (int i = 0; i < NUM_TABLES; i++)
+				{
+					for (int j = 0; j < NUM_BALLS; j++)
+						gTables[i].balls[j].Reset();
+				}
+				currentBall = 0;
+			}
+
+			for(int i = 0; i<NUM_TABLES; i++)
+				gTables[i].balls[currentBall].NextUp();
+		}
+
 		if(gCueControl[0]) gCueAngle -= ((gCueAngleSpeed * ms)/1000);
 		if(gCueControl[1]) gCueAngle += ((gCueAngleSpeed * ms)/1000);
 		if (gCueAngle <0.0) gCueAngle += TWO_PI;
@@ -466,7 +533,12 @@ void UpdateScene(int ms)
 
 	DoCamera(ms);
 
-	gTable.Update(ms);
+	//gTable.Update(ms);
+
+	for (int i = 0; i < NUM_TABLES; i++)
+	{
+		gTables[i].Update(ms);
+	}
 
 	glutTimerFunc(SIM_UPDATE_MS, UpdateScene, SIM_UPDATE_MS);
 	glutPostRedisplay();
@@ -474,15 +546,27 @@ void UpdateScene(int ms)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	gTable.SetupCushions();
-	gTable.SetupFakeCushions();
+	//gTable.SetupCushions();
+	//gTable.SetupFakeCushions();
+
+	for (int i = 0; i < NUM_TABLES; i++)
+	{
+		gTables[i].SetupCushions();
+		gTables[i].SetupFakeCushions();
+
+		cout << "-------------------------" << endl;
+		cout << "Table " << i << "		Game 1" << endl;
+		cout << "Team 1 Total Score:	" << "0" << endl;
+		cout << "Team 2 Total Score:	" << "0" << endl;
+		cout << "-------------------------" << endl;
+	}
 
 	glutInit(&argc, ((char **)argv));
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE| GLUT_RGBA);
 	glutInitWindowPosition(0,0);
 	glutInitWindowSize(1000,700);
 	//glutFullScreen();
-	glutCreateWindow("MSc Workshop : Pool Game");
+	glutCreateWindow("Curling Game - Jordan Cave");
 	#if DRAW_SOLID
 	InitLights();
 	#endif

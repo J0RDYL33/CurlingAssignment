@@ -13,8 +13,9 @@
 #define BALL_MASS		(0.1f)
 #define TWO_PI			(6.2832f)
 #define	SIM_UPDATE_MS	(10)
-#define NUM_BALLS		(7)		
-#define NUM_CUSHIONS	(4)		
+#define NUM_BALLS		(16)		
+#define NUM_CUSHIONS	(4)
+#define NUM_TABLES		(5)
 
 /*-----------------------------------------------------------
   plane normals
@@ -59,6 +60,7 @@ public:
 	float	radius;
 	float	mass;
 	int		index;
+	bool	team1;
 
 	ball(): position(0.0), velocity(0.0), radius(BALL_RADIUS), 
 		mass(BALL_MASS) {index = ballIndexCnt++; Reset();}
@@ -69,6 +71,7 @@ public:
 	void DoPlaneCollision(const cushion &c);
 	void DoBallCollision(ball &b);
 	void Update(int ms);
+	void NextUp(void);
 	
 	bool HasHitPlane(const cushion &c) const;
 	bool HasHitBall(const ball &b) const;
@@ -94,7 +97,9 @@ public:
 	bool AnyBallsMoving(void) const;
 };
 
+
 /*-----------------------------------------------------------
   global table
   -----------------------------------------------------------*/
 extern table gTable;
+extern table gTables[NUM_TABLES];
