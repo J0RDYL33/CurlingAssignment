@@ -1,3 +1,4 @@
 C:\Users\Computing\Documents\Pool Assignment\Pool Game v2.0\Debug\Pool Game.exe
 D:\VS Projects\Pool-Assignment\Pool Game v2.0\Debug\Pool Game.exe
 D:\VS Projects\CurlingAssignment\Debug\Pool Game.exe
+C:\Users\Computing\Documents\GitHub\CurlingAssignment\Debug\Pool Game.exe

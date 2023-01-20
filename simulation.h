@@ -59,8 +59,9 @@ public:
 	vec2	velocity;
 	float	radius;
 	float	mass;
-	int		index;
+	float distanceFromTee;
 	bool	team1;
+	int		index;
 
 	ball(): position(0.0), velocity(0.0), radius(BALL_RADIUS), 
 		mass(BALL_MASS) {index = ballIndexCnt++; Reset();}
@@ -80,6 +81,32 @@ public:
 	void HitBall(ball &b);
 };
 
+/*-------------------------------------------------------------
+Score Board Class
+---------------------------------------------------------------*/
+class scoreboard
+{
+	static int scoreboardIndexCnt;
+public:
+	int tableNumber;
+	int gameNumber;
+	bool onTeam1;
+	int maxTeamSize;
+	int playersOn1;
+	int playersOn2;
+	int team1Score;
+	int team2Score;
+	int index;
+
+	scoreboard() { index = scoreboardIndexCnt++; Reset(); }
+	void AddScore1(int pointsToAdd);
+	void AddScore2(int pointsToAdd);
+	void IncrimentGame(void);
+	void DecideWinner(void);
+	void DisplayCurrentInfo(void);
+	void Reset(void);
+};
+
 /*-----------------------------------------------------------
   table class
   -----------------------------------------------------------*/
@@ -89,6 +116,7 @@ public:
 	ball balls[NUM_BALLS];	
 	cushion cushions[NUM_CUSHIONS];
 	fakeCushion fakeCushions[NUM_CUSHIONS];
+	scoreboard myBoard;
 	void SetupCushions(void);
 	void SetCushionPosition(int cushionIndex, float vertices00, float vertices01, float vertices10, float vertices11);
 	void SetupFakeCushions(void);
@@ -98,8 +126,9 @@ public:
 };
 
 
+
 /*-----------------------------------------------------------
   global table
   -----------------------------------------------------------*/
-extern table gTable;
+//extern table gTable;
 extern table gTables[NUM_TABLES];

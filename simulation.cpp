@@ -3,6 +3,9 @@
   -----------------------------------------------------------*/
 #include"stdafx.h"
 #include"simulation.h"
+//#include <cstdlib>
+#include <iostream>
+using namespace std;
 
 /*-----------------------------------------------------------
   macros
@@ -19,7 +22,7 @@ vec2	gPlaneNormal_Right(-1.0,0.0);
 vec2	gPlaneNormal_Bottom(0.0,-1.0);
 */
 
-table gTable;
+//table gTable;
 table gTables[NUM_TABLES];
 
 static const float gRackPositionX[] = {0.0f,0.0f,(BALL_RADIUS*2.0f),(-BALL_RADIUS*2.0f),(BALL_RADIUS*4.0f)}; 
@@ -109,6 +112,12 @@ void ball::ApplyFrictionForce(int ms)
 	//cap magnitude of change in velocity to remove integration errors
 	if(velocityChange.Magnitude() > velocity.Magnitude()) velocity = 0.0;
 	else velocity += velocityChange;
+
+	int tableNo = index / NUM_BALLS;
+
+
+	distanceFromTee = sqrt((position(0) - (0)) + (position(0) - (0)) + (position(1) - (-4)) * (position(1) - (-4)));
+	cout << "Table " << tableNo << "ball " << index % NUM_BALLS << " Distance from tee: " << distanceFromTee << endl;
 }
 
 void ball::DoBallCollision(ball &b)
@@ -285,4 +294,63 @@ bool table::AnyBallsMoving(void) const
 		if(balls[i].velocity(1)!=0.0) return true;
 	}
 	return false;
+}
+
+/*-------------------------------------------------------
+Scoreboard Class Members
+---------------------------------------------------------*/
+int scoreboard::scoreboardIndexCnt = 0;
+
+void scoreboard::AddScore1(int pointsToAdd)
+{
+	team1Score += pointsToAdd;
+}
+
+void scoreboard::AddScore2(int pointsToAdd)
+{
+	team2Score += pointsToAdd;
+}
+
+void scoreboard::IncrimentGame(void)
+{
+	gameNumber++;
+
+	if (gameNumber > 8)
+		DecideWinner();
+}
+
+void scoreboard::DecideWinner(void)
+{
+	if (team1Score > team2Score)
+	{
+		//Team 1 wins
+	}
+	else if (team1Score < team2Score)
+	{
+		//Team 2 wins
+	}
+	else
+	{
+		//It's a draw
+	}
+}
+
+void scoreboard::Reset(void)
+{
+	gameNumber = 0;
+	team1Score = 0;
+	team2Score = 0;
+
+	DisplayCurrentInfo();
+}
+
+void scoreboard::DisplayCurrentInfo(void)
+{
+	cout << "-------------------------" << endl;
+	cout << "Table " << index << "		Game " << gameNumber << endl;
+	cout << "Team 1 Players:		" << playersOn1 << endl;
+	cout << "Team 2 Players:		" << playersOn2 << endl;
+	cout << "Team 1 Total Score:	" << team1Score << endl;
+	cout << "Team 2 Total Score:	" << team2Score << endl;
+	cout << "-------------------------" << endl;
 }

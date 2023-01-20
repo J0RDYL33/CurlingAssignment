@@ -166,10 +166,10 @@ void RenderTables(int tablePos)
 	for (int i = 0; i < NUM_CUSHIONS; i++)
 	{
 		glBegin(GL_QUADS);
-		glVertex3f(gTable.cushions[i].vertices[0](0), -0.05, gTable.cushions[i].vertices[0](1));
-		glVertex3f(gTable.cushions[i].vertices[0](0), 0.00, gTable.cushions[i].vertices[0](1));
-		glVertex3f(gTable.cushions[i].vertices[1](0), 0.00, gTable.cushions[i].vertices[1](1));
-		glVertex3f(gTable.cushions[i].vertices[1](0), -0.05, gTable.cushions[i].vertices[1](1));
+		glVertex3f(gTables[tablePos].cushions[i].vertices[0](0), -0.05, gTables[tablePos].cushions[i].vertices[0](1));
+		glVertex3f(gTables[tablePos].cushions[i].vertices[0](0), 0.00, gTables[tablePos].cushions[i].vertices[0](1));
+		glVertex3f(gTables[tablePos].cushions[i].vertices[1](0), 0.00, gTables[tablePos].cushions[i].vertices[1](1));
+		glVertex3f(gTables[tablePos].cushions[i].vertices[1](0), -0.05, gTables[tablePos].cushions[i].vertices[1](1));
 		glEnd();
 	}
 
@@ -553,12 +553,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		gTables[i].SetupCushions();
 		gTables[i].SetupFakeCushions();
-
-		cout << "-------------------------" << endl;
-		cout << "Table " << i << "		Game 1" << endl;
-		cout << "Team 1 Total Score:	" << "0" << endl;
-		cout << "Team 2 Total Score:	" << "0" << endl;
-		cout << "-------------------------" << endl;
 	}
 
 	glutInit(&argc, ((char **)argv));
