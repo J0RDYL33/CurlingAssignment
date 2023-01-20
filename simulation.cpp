@@ -5,6 +5,7 @@
 #include"simulation.h"
 //#include <cstdlib>
 #include <iostream>
+#include<algorithm>
 using namespace std;
 
 /*-----------------------------------------------------------
@@ -117,7 +118,7 @@ void ball::ApplyFrictionForce(int ms)
 
 
 	distanceFromTee = sqrt((position(0) - (0)) + (position(0) - (0)) + (position(1) - (-4)) * (position(1) - (-4)));
-	cout << "Table " << tableNo << "ball " << index % NUM_BALLS << " Distance from tee: " << distanceFromTee << endl;
+	//cout << "Table " << tableNo << "ball " << index % NUM_BALLS << " Distance from tee: " << distanceFromTee << endl;
 }
 
 void ball::DoBallCollision(ball &b)
@@ -296,6 +297,70 @@ bool table::AnyBallsMoving(void) const
 	return false;
 }
 
+void table::SortBalls()
+{
+	int ballsOrder[NUM_BALLS];
+
+	for (int i = 0; i < NUM_BALLS; i++)
+	{
+		ballsOrder[i] = i;
+	}
+
+	//Sort the balls in the order of which they are from the tee
+	std::sort(std::begin(ballsOrder), std::end(ballsOrder), [&](int a, int b) { return balls[a].distanceFromTee < balls[b].distanceFromTee; });
+
+	bool othersNotFound = false;
+	int posInOrder = 1;
+	//If the ball in first position of the order is of team 1, then they'll be getting the points
+	if (balls[ballsOrder[0]].team1)
+	{
+		pointsToAdd++;
+		while (othersNotFound == false)
+		{
+			if (balls[ballsOrder[posInOrder]].team1)
+			{
+				pointsToAdd++;
+				posInOrder++;
+			}
+			else
+			{
+				othersNotFound = true;
+			}
+		}
+
+		myBoard.AddScore1(pointsToAdd);
+	}
+	else if (!balls[ballsOrder[0]].team1)
+	{
+		pointsToAdd++;
+		while (othersNotFound == false)
+		{
+			if (!balls[ballsOrder[posInOrder]].team1)
+			{
+				pointsToAdd++;
+				posInOrder++;
+			}
+			else
+			{
+				othersNotFound = true;
+			}
+		}
+
+		myBoard.AddScore2(pointsToAdd);
+	}
+
+	Reset();
+}
+
+void table::Reset()
+{
+	//Reset the position of the stones
+	for (int i = 0; i < NUM_BALLS; i++)
+		balls[i].Reset();
+
+	myBoard.IncrimentGame();
+}
+
 /*-------------------------------------------------------
 Scoreboard Class Members
 ---------------------------------------------------------*/
@@ -315,8 +380,13 @@ void scoreboard::IncrimentGame(void)
 {
 	gameNumber++;
 
-	if (gameNumber > 8)
+	if (gameNumber > 7)
+	{
 		DecideWinner();
+		return;
+	}
+
+	DisplayCurrentInfo();
 }
 
 void scoreboard::DecideWinner(void)

@@ -12,7 +12,7 @@
 #define BALL_RADIUS		(0.05f)
 #define BALL_MASS		(0.1f)
 #define TWO_PI			(6.2832f)
-#define	SIM_UPDATE_MS	(10)
+#define	SIM_UPDATE_MS	(50)
 #define NUM_BALLS		(16)		
 #define NUM_CUSHIONS	(4)
 #define NUM_TABLES		(5)
@@ -26,6 +26,16 @@ extern vec2	gPlaneNormal_Top;
 extern vec2	gPlaneNormal_Right;
 extern vec2	gPlaneNormal_Bottom;
 */
+
+/*------------------------------------------------------------
+Player Class
+--------------------------------------------------------------*/
+class player
+{
+	//static int playerIndexCnt;
+public:
+
+};
 
 
 /*-----------------------------------------------------------
@@ -117,6 +127,9 @@ public:
 	cushion cushions[NUM_CUSHIONS];
 	fakeCushion fakeCushions[NUM_CUSHIONS];
 	scoreboard myBoard;
+	int pointsToAdd;
+	void SortBalls();
+	void Reset();
 	void SetupCushions(void);
 	void SetCushionPosition(int cushionIndex, float vertices00, float vertices01, float vertices10, float vertices11);
 	void SetupFakeCushions(void);

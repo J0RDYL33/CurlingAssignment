@@ -510,8 +510,7 @@ void UpdateScene(int ms)
 			{
 				for (int i = 0; i < NUM_TABLES; i++)
 				{
-					for (int j = 0; j < NUM_BALLS; j++)
-						gTables[i].balls[j].Reset();
+					gTables[i].SortBalls();
 				}
 				currentBall = 0;
 			}
@@ -519,6 +518,7 @@ void UpdateScene(int ms)
 			for(int i = 0; i<NUM_TABLES; i++)
 				gTables[i].balls[currentBall].NextUp();
 		}
+
 
 		if(gCueControl[0]) gCueAngle -= ((gCueAngleSpeed * ms)/1000);
 		if(gCueControl[1]) gCueAngle += ((gCueAngleSpeed * ms)/1000);
