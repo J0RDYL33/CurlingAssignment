@@ -1,6 +1,6 @@
 ﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  simulation.cpp
+D:\VS Projects\CurlingAssignment\simulation.cpp(121,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Pool Game.cpp
   Generating Code...
-  Skipping... (no relevant changes detected)
-  simulation.cpp
-  Pool Game.vcxproj -> C:\Users\Computing\Documents\GitHub\CurlingAssignment\Debug\Pool Game.exe
+  Pool Game.vcxproj -> D:\VS Projects\CurlingAssignment\Debug\Pool Game.exe

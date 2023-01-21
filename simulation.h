@@ -12,9 +12,10 @@
 #define BALL_RADIUS		(0.05f)
 #define BALL_MASS		(0.1f)
 #define TWO_PI			(6.2832f)
-#define	SIM_UPDATE_MS	(50)
+#define	SIM_UPDATE_MS	(10)
 #define NUM_BALLS		(16)		
 #define NUM_CUSHIONS	(4)
+//Change this to add/remove as many curling sheets as desired
 #define NUM_TABLES		(5)
 
 /*-----------------------------------------------------------
@@ -52,6 +53,8 @@ public:
 	void MakeCentre(void);
 };
 
+//Derives everything from the cushion class
+//Used to show the blue outlines at the sides of the curling sheets, but doesn't have a hitbox
 class fakeCushion : public cushion
 {
 
@@ -60,7 +63,6 @@ class fakeCushion : public cushion
 /*-----------------------------------------------------------
   ball class
   -----------------------------------------------------------*/
-
 class ball
 {
 	static int ballIndexCnt;

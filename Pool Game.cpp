@@ -138,6 +138,7 @@ void DoCamera(int ms)
 	}
 }
 
+//Renders everything in the game, including stones and curling sheet
 void RenderTables(int tablePos)
 {
 	//draw the ball
@@ -500,12 +501,13 @@ void UpdateScene(int ms)
 
 	if(gDoCue)
 	{
-		//For now only works with table 1, move currentBall to table class to scale
+		//Moves the current stone to the starting position as soon as the previous stones finish moving
 		if (justFinishedTurn == true)
 		{
 			currentBall++;
 			justFinishedTurn = false;
 
+			//If all stones are in play, sort the stones using their distance from the tee and decide a winner
 			if (currentBall >= NUM_BALLS)
 			{
 				for (int i = 0; i < NUM_TABLES; i++)
@@ -535,6 +537,7 @@ void UpdateScene(int ms)
 
 	//gTable.Update(ms);
 
+	//Update all tables
 	for (int i = 0; i < NUM_TABLES; i++)
 	{
 		gTables[i].Update(ms);

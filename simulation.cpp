@@ -58,6 +58,7 @@ void cushion::MakeCentre(void)
   -----------------------------------------------------------*/
 int ball::ballIndexCnt = 0;
 
+//Resets the position of all the stones back to where they were and works out the index of the ball for the table it's on
 void ball::Reset(void)
 {
 	//set velocity to zero
@@ -116,9 +117,8 @@ void ball::ApplyFrictionForce(int ms)
 
 	int tableNo = index / NUM_BALLS;
 
-
+	//While the stone is moving, constantly calculate the distance from the tee and store the value
 	distanceFromTee = sqrt((position(0) - (0)) + (position(0) - (0)) + (position(1) - (-4)) * (position(1) - (-4)));
-	//cout << "Table " << tableNo << "ball " << index % NUM_BALLS << " Distance from tee: " << distanceFromTee << endl;
 }
 
 void ball::DoBallCollision(ball &b)
@@ -217,6 +217,7 @@ void ball::HitBall(ball &b)
 	b.velocity = parallelV2 + (relDir*perpVNew2);
 }
 
+//Moves the stone to the starting position when it is its turn to go
 void ball::NextUp(void)
 {
 	position(1) = 4;
@@ -247,6 +248,7 @@ void table::SetCushionPosition(int cushionIndex, float vertices00, float vertice
 	cushions[cushionIndex].MakeNormal();
 }
 
+//Same as the cushion class but doesn't have a hitbox. Gives a border to each of the curling sheets
 void table::SetupFakeCushions(void)
 {
 	SetFakeCushionPosition(0, -TABLE_X, -TABLE_Z, -TABLE_X, TABLE_Z);
@@ -255,6 +257,7 @@ void table::SetupFakeCushions(void)
 	SetFakeCushionPosition(3, TABLE_X, -TABLE_Z, -TABLE_X, -TABLE_Z);
 }
 
+//Sets the fake cushions positions in its own function to make the code neater
 void table::SetFakeCushionPosition(int cushionIndex, float vertices00, float vertices01, float vertices10, float vertices11)
 {
 	fakeCushions[cushionIndex].vertices[0](0) = vertices00;
@@ -297,6 +300,9 @@ bool table::AnyBallsMoving(void) const
 	return false;
 }
 
+//Sorting function for when all stones are in play
+//Sorts the balls in order using their distance from the tee, then calculates the score based on how many of a teams stones
+//Are nearer to the tee than the first one of the opposing team, just how it is in real curling
 void table::SortBalls()
 {
 	int ballsOrder[NUM_BALLS];
@@ -366,16 +372,20 @@ Scoreboard Class Members
 ---------------------------------------------------------*/
 int scoreboard::scoreboardIndexCnt = 0;
 
+//If team 1 wins a game, this gets called to add points to their score
 void scoreboard::AddScore1(int pointsToAdd)
 {
 	team1Score += pointsToAdd;
 }
 
+//If team 2 wins a game, this gets called to add points to their score
 void scoreboard::AddScore2(int pointsToAdd)
 {
 	team2Score += pointsToAdd;
 }
 
+//Called when a game has finished to show the players what game they're currently on
+//If 8 games have been played (The amount played in real curling in a set), then a winner is decided
 void scoreboard::IncrimentGame(void)
 {
 	gameNumber++;
@@ -389,22 +399,34 @@ void scoreboard::IncrimentGame(void)
 	DisplayCurrentInfo();
 }
 
+//Called when 8 games have been played to decide who won the set
 void scoreboard::DecideWinner(void)
 {
 	if (team1Score > team2Score)
 	{
 		//Team 1 wins
+		cout << "-------------------------" << endl;
+		cout << "Table " << index << " Team 1 has won the game!" << endl;
+		cout << "-------------------------" << endl;
 	}
 	else if (team1Score < team2Score)
 	{
 		//Team 2 wins
+		cout << "-------------------------" << endl;
+		cout << "Table " << index << " Team 2 has won the game!" << endl;
+		cout << "-------------------------" << endl;
 	}
 	else
 	{
 		//It's a draw
+		cout << "-------------------------" << endl;
+		cout << "Table " << index << " Its a draw between team 1 and 2!" << endl;
+		cout << "-------------------------" << endl;
 	}
+	Reset();
 }
 
+//Resets the game once all 8 games have been played back to the original values
 void scoreboard::Reset(void)
 {
 	gameNumber = 0;
@@ -414,6 +436,7 @@ void scoreboard::Reset(void)
 	DisplayCurrentInfo();
 }
 
+//Displays in console the scoreboards information, including the table number, the game number, players on each team, and score of each team
 void scoreboard::DisplayCurrentInfo(void)
 {
 	cout << "-------------------------" << endl;
